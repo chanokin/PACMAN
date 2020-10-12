@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2020-2021 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,11 +12,22 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from pacman.model.partitioner_interfaces import AbstractSplitterCommon
 
--r requirements.txt
-coverage >= 4.4, < 5.0
-# pytest will be brought in by pytest-cov
-pytest-cov
-sphinx==1.5.3
-pylint
-testfixtures
+
+class AbstractDependentSplitter(AbstractSplitterCommon):
+    """ splitter that works on slices from another splitter.
+
+    """
+
+    __slots__ = [
+        "_other_splitter"
+    ]
+
+    def __init__(self, other_splitter, splitter_name):
+        AbstractSplitterCommon.__init__(self, splitter_name)
+        self._other_splitter = other_splitter
+
+    @property
+    def other_splitter(self):
+        return self._other_splitter

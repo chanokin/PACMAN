@@ -30,7 +30,6 @@ from pacman.model.resources import (
 from pacman.model.routing_info import BaseKeyAndMask
 from pacman.model.graphs.machine import (
     MachineEdge, MachineGraph, SimpleMachineVertex)
-from pacman.model.placements.placements import Placements
 from pacman.model.placements.placement import Placement
 
 
@@ -364,14 +363,6 @@ def placement_from_json(json_dict, graph=None):
     vertex = vertex_lookup(json_dict["vertex_label"], graph)
     return Placement(
         vertex, int(json_dict["x"]), int(json_dict["y"]), int(json_dict["p"]))
-
-
-def placements_from_json(json_list, graph=None):
-    json_list = json_to_object(json_list)
-    placements = Placements()
-    for json_placement in json_list:
-        placements.add_placement(placement_from_json(json_placement))
-    return placements
 
 
 def partition_to_n_keys_map_to_json(partition_to_n_keys_map):
