@@ -19,8 +19,8 @@ from .dtcm_resource import DTCMResource
 
 
 class ResourceContainer(object):
-    """ Container for the types of resources so that ordering is no\
-        longer a problem.
+    """ Container for the types of resources so that ordering is not\
+        a problem.
     """
 
     __slots__ = [
@@ -54,22 +54,16 @@ class ResourceContainer(object):
             reverse_iptags=None):
         """
         :param dtcm: the amount of dtcm used
+        :type dtcm: None or DTCMResource
         :param sdram: the amount of SDRAM used
+        :type sdram: None or AbstractSDRAM
         :param cpu_cycles: the amount of CPU used
+        :type cpu_cycles: None or CPUCyclesPerTickResource
         :param iptags: the IP tags required
+        :type iptags: None or list(IPtagResource)
         :param reverse_iptags: the reverse IP tags required
-        :type dtcm: None or \
-            :py:class:`pacman.models.resources.dtcm_resource.DTCMResource`
-        :type sdram: None or \
-            :py:class:`pacman.models.resources.sdram_resource.SDRAMResource`
-        :type cpu_cycles: None or \
-            :py:class:`pacman.models.resources.cpu_cycles_per_tick_resource.CPUCyclesPerTickResource`
-        :type iptags: None or \
-            list(:py:class:`pacman.models.resources.iptag_resource.IPtagResource`)
         :type reverse_iptags: None or \
-            list(:py:class:`pacman.models.resources.reverse_iptag_resource.ReverseIPtagResource`)
-        :rtype: pacman.models.resources.resource_container.ResourceContainer
-        :raise None: does not raise any known exception
+            list(SpecificBoardReverseIPtagResource)
         """
         # pylint: disable=too-many-arguments
         self._dtcm_usage = dtcm
@@ -111,7 +105,9 @@ class ResourceContainer(object):
         return self._reverse_iptags
 
     def extend(self, other):
-
+        """
+        :param ResourceContainer other:
+        """
         # added CPU stuff
         self._cpu_cycles = CPUCyclesPerTickResource(
             self._cpu_cycles.get_value() + other.cpu_cycles.get_value())
@@ -121,7 +117,7 @@ class ResourceContainer(object):
             self._dtcm_usage.get_value() + other.dtcm.get_value())
 
         # add SDRAM usage
-        self._sdram_usage = self._sdram_usage + other._sdram_usage
+        self._sdram_usage = self._sdram_usage + other.sdram
 
         # add IPtags
         self._iptags.extend(other.iptags)
@@ -130,9 +126,6 @@ class ResourceContainer(object):
         self._reverse_iptags.extend(other.reverse_iptags)
 
     def __eq__(self, other):
-        """
-        For unit tests ONLY so __hash__ and __eq__ pairing not done!
-        """
         if self._dtcm_usage.get_value() != other.dtcm.get_value():
             return False
         if self._sdram_usage.fixed != other._sdram_usage.fixed:
@@ -144,3 +137,14 @@ class ResourceContainer(object):
         if self._iptags != other._iptags:
             return False
         return self._reverse_iptags == other._reverse_iptags
+
+    def __hash__(self):
+        return hash((self._dtcm_usage.get_value(),
+                     self._sdram_usage.fixed,
+                     self._sdram_usage.per_timestep,
+                     self._cpu_cycles.get_value(),
+                     self._iptags,
+                     self._reverse_iptags))
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
